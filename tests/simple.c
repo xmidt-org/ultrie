@@ -26,10 +26,11 @@ void test_add( void )
 {
     ultrie_t t;
     int i;
+    uint64_t val;
 
     struct tests {
         const char *k;
-        int v;
+        uint64_t v;
     } test_vector[] = {
         { .k = "cab",      .v = 1  },
         { .k = "cad",      .v = 2  },
@@ -60,23 +61,30 @@ void test_add( void )
     CU_ASSERT( NULL != t );
 
     for( i = 0; NULL != test_vector[i].k; i++ ) {
-        ultrie_add( t, test_vector[i].k, &test_vector[i].v );
-        CU_ASSERT( &test_vector[i].v == ultrie_find(t, test_vector[i].k) );
+        ultrie_add( t, test_vector[i].k, test_vector[i].v );
+        CU_ASSERT( 0 == ultrie_find(t, test_vector[i].k, &val) );
+        CU_ASSERT( test_vector[i].v == val );
     }
     ultrie_print( t );
 
-    CU_ASSERT( -1 == ultrie_add(NULL, "apple", (void*) 99) );
-    CU_ASSERT( -1 == ultrie_add(t, NULL, (void*) 99) );
-    CU_ASSERT( -2 == ultrie_add(t, "apple", (void*) 99) );
+    CU_ASSERT( -1 == ultrie_add(NULL, "apple", 99) );
+    CU_ASSERT( -1 == ultrie_add(t, NULL, 99) );
+    CU_ASSERT( -2 == ultrie_add(t, "apple", 99) );
 
     for( i = 0; NULL != test_vector[i].k; i++ ) {
-        CU_ASSERT( &test_vector[i].v == ultrie_find(t, test_vector[i].k) );
+        CU_ASSERT( 0 == ultrie_find(t, test_vector[i].k, &val) );
+        CU_ASSERT( test_vector[i].v == val );
     }
 
-    CU_ASSERT( NULL == ultrie_find(t, NULL) );
+    val = 88;
+    CU_ASSERT( 0 != ultrie_find(t, NULL, &val) );
+    CU_ASSERT( 88 == val );
+    CU_ASSERT( 0 == ultrie_find(t, "apple", NULL) );
+    CU_ASSERT( 0 != ultrie_find(t, "invalid", NULL) );
+    CU_ASSERT( 0 != ultrie_find(t, NULL, NULL) );
 
     for( i = 0; NULL != invalid[i]; i++ ) {
-        CU_ASSERT( NULL == ultrie_find(t, invalid[i]) );
+        CU_ASSERT( 0 != ultrie_find(t, invalid[i], NULL) );
     }
 
     ultrie_destroy( t );

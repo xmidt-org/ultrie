@@ -15,6 +15,7 @@
  */
 
 #include <stdio.h>
+#include <inttypes.h>
 
 #include "ultrie.h"
 #include "internal.h"
@@ -64,17 +65,10 @@ void ultrie_print( ultrie_t _u )
  */
 static void __print_node( struct ultrie *u )
 {
-    if( NULL == u->value ) {
-        printf( "struct%p [label=\"{<p> string | token | value | child | next } | { '%s' | %s |  | <child> %s | <next> %s }\"];\n",
-                (void*) u, u->string, ((0 == u->token) ? "false" : "true"),
-                ((NULL == u->child) ? "NULL" : " "),
-                ((NULL == u->next) ? "NULL" : " ") );
-    } else {
-        printf( "struct%p [label=\"{<p> string | token | value | child | next } | { '%s' | %s | %p | <child> %s | <next> %s }\"];\n",
-                (void*) u, u->string, ((0 == u->token) ? "false" : "true"), u->value,
-                ((NULL == u->child) ? "NULL" : " "),
-                ((NULL == u->next) ? "NULL" : " ") );
-    }
+    printf( "struct%p [label=\"{<p> string | token | value | child | next } | { '%s' | %s | %"PRIu64" | <child> %s | <next> %s }\"];\n",
+            (void*) u, u->string, ((0 == u->token) ? "false" : "true"), u->value,
+            ((NULL == u->child) ? "NULL" : " "),
+            ((NULL == u->next) ? "NULL" : " ") );
 
     if( NULL != u->child ) {
         printf( "struct%p:child -> struct%p:p;\n", (void*) u, (void*) u->child );

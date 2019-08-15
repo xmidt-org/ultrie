@@ -16,14 +16,16 @@
 #ifndef __INTERNAL_H__
 #define __INTERNAL_H__
 
+#include <stdbool.h>
+#include <stdint.h>
+
 struct ultrie {
-    char *string;
-    int  token;
-    void *value;
+    char    *string;
+    bool     token;
+    uint64_t value;
 
     struct ultrie *child;
     struct ultrie *next;
 };
-
 
 #endif

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -38,7 +40,7 @@
 /*----------------------------------------------------------------------------*/
 /*                             Function Prototypes                            */
 /*----------------------------------------------------------------------------*/
-static struct ultrie* __new( const char *k, void *v, int token );
+static struct ultrie* __new( const char *k, uint64_t v, bool token );
 
 /*----------------------------------------------------------------------------*/
 /*                             External Functions                             */
@@ -47,7 +49,7 @@ static struct ultrie* __new( const char *k, void *v, int token );
 /* See ultrie.h for details. */
 ultrie_t ultrie_new( void )
 {
-    return (ultrie_t) __new( NULL, NULL, 0 );
+    return (ultrie_t) __new( NULL, 0, false );
 }
 
 /* See ultrie.h for details. */
@@ -81,12 +83,12 @@ void ultrie_destroy( ultrie_t _u )
 }
 
 /* See ultrie.h for details. */
-void* ultrie_find( ultrie_t _u, const char *k )
+int ultrie_find( ultrie_t _u, const char *k, uint64_t *v )
 {
     struct ultrie *u = (struct ultrie*) _u;
 
     if( NULL == k ) {
-        return NULL;
+        return -1;
     }
 
     while( NULL != u ) {
@@ -94,7 +96,7 @@ void* ultrie_find( ultrie_t _u, const char *k )
 
         if( *k < *s ) {
             /* Not found since the trie is sorted. */
-            return NULL;
+            return -1;
         } else if( *s < *k ){
             /* Look next until we have a character that matches. */
             u = u->next;
@@ -108,23 +110,26 @@ void* ultrie_find( ultrie_t _u, const char *k )
             if( '\0' == *s && '\0' == *k ) {
                 /* Exact match.  We're done. */
                 if( u->token ) {
-                    return u->value;
+                    if( NULL != v ) {
+                        *v = u->value;
+                    }
+                    return 0;
                 }
-                return NULL;
+                return -1;
             } else if( '\0' == *s && *k ) {
                 /* We must continue down a child node. */
                 u = u->child;
             } else {
                 /* We did not match. */
-                return NULL;
+                return -1;
             }
         }
     }
-    return NULL;
+    return -1;
 }
 
 /* See ultrie.h for details. */
-int ultrie_add( ultrie_t _u, const char *k, void *v )
+int ultrie_add( ultrie_t _u, const char *k, uint64_t v )
 {
     struct ultrie *u = (struct ultrie*) _u;
 
@@ -165,7 +170,7 @@ int ultrie_add( ultrie_t _u, const char *k, void *v )
             } else {
                 if( NULL == u->child ) {
                     /* Add a new child. */
-                    u->child = __new( k, v, 1 );
+                    u->child = __new( k, v, true );
                     return 0;
                 } else {
                     /* Search children. */
@@ -203,17 +208,17 @@ int ultrie_add( ultrie_t _u, const char *k, void *v )
                     if( NULL == u->next ) {
                         if( u->string == s ) {
                             /* Append a new node to the end of the list */
-                            u->next = __new( k, v, 1 );
+                            u->next = __new( k, v, true );
                             return 0;
                         } else {
                             /* Split a long string into 2 children. */
-                            struct ultrie *p1 = __new( k, v, 1 );
-                            struct ultrie *p2 = __new( s, u->value, 1 );
+                            struct ultrie *p1 = __new( k, v, true );
+                            struct ultrie *p2 = __new( s, u->value, true );
 
                             p2->child = u->child;
                             u->child = p2;
                             u->token = 0;
-                            u->value = NULL;
+                            u->value = 0;
                             p2->next = p1;
                             *s = '\0';
                             return 0;
@@ -235,7 +240,7 @@ int ultrie_add( ultrie_t _u, const char *k, void *v )
 /*----------------------------------------------------------------------------*/
 /*                             Internal functions                             */
 /*----------------------------------------------------------------------------*/
-static struct ultrie* __new( const char *k, void *v, int token )
+static struct ultrie* __new( const char *k, uint64_t v, bool token )
 {
     struct ultrie *rv;
 
