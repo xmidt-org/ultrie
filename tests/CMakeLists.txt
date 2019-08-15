@@ -29,6 +29,15 @@ target_link_libraries (simple gcov)
 target_link_libraries (simple rt)
 endif()
 
+add_test(NAME Benchmark COMMAND ${MEMORY_CHECK} ./benchmark)
+add_executable(benchmark benchmark.c ../src/ultrie.c ../src/print.c ../src/find.c)
+set_property(TARGET benchmark PROPERTY C_STANDARD 99)
+
+target_link_libraries (benchmark cunit)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+target_link_libraries (benchmark rt)
+endif()
+
 add_custom_target(coverage
                   COMMAND lcov -q --capture --directory ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/simple.dir/__/src --output-file coverage.info
                   COMMAND genhtml coverage.info
