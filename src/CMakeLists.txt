@@ -15,7 +15,7 @@
 set(PROJ_ULTRIE ultrie)
 
 file(GLOB HEADERS ultrie.h)
-set(SOURCES ultrie.c print.c)
+set(SOURCES ultrie.c find.c print.c)
 
 add_library(${PROJ_ULTRIE} STATIC ${HEADERS} ${SOURCES})
 add_library(${PROJ_ULTRIE}.shared SHARED ${HEADERS} ${SOURCES})

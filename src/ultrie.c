@@ -83,52 +83,6 @@ void ultrie_destroy( ultrie_t _u )
 }
 
 /* See ultrie.h for details. */
-int ultrie_find( ultrie_t _u, const char *k, uint64_t *v )
-{
-    struct ultrie *u = (struct ultrie*) _u;
-
-    if( NULL == k ) {
-        return -1;
-    }
-
-    while( NULL != u ) {
-        char *s = u->string;
-
-        if( *k < *s ) {
-            /* Not found since the trie is sorted. */
-            return -1;
-        } else if( *s < *k ){
-            /* Look next until we have a character that matches. */
-            u = u->next;
-        } else {
-            /* Found 1 character that matched, now power through them all. */
-            while( (*s) && (*k) && (*s == *k) ) {
-                s++;
-                k++;
-            }
-
-            if( '\0' == *s && '\0' == *k ) {
-                /* Exact match.  We're done. */
-                if( u->token ) {
-                    if( NULL != v ) {
-                        *v = u->value;
-                    }
-                    return 0;
-                }
-                return -1;
-            } else if( '\0' == *s && *k ) {
-                /* We must continue down a child node. */
-                u = u->child;
-            } else {
-                /* We did not match. */
-                return -1;
-            }
-        }
-    }
-    return -1;
-}
-
-/* See ultrie.h for details. */
 int ultrie_add( ultrie_t _u, const char *k, uint64_t v )
 {
     struct ultrie *u = (struct ultrie*) _u;

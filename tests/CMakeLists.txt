@@ -20,7 +20,7 @@ set (MEMORY_CHECK valgrind --leak-check=full --show-reachable=yes --error-exitco
 endif ()
 
 add_test(NAME Simple COMMAND ${MEMORY_CHECK} ./simple)
-add_executable(simple simple.c ../src/ultrie.c ../src/print.c)
+add_executable(simple simple.c ../src/ultrie.c ../src/print.c ../src/find.c)
 set_property(TARGET simple PROPERTY C_STANDARD 99)
 
 target_link_libraries (simple cunit)
